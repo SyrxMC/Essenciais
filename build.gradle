@@ -61,7 +61,7 @@ dependencies {
 
     compileOnly 'com.github.SyrxMC:SyrxCore:1.0.1'
 
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
 
 
 }

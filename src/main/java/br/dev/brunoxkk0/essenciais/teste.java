@@ -6,7 +6,6 @@ import br.dev.brunoxkk0.essenciais.core.user.UserDataStore;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.UUID;
 
 public class teste {
