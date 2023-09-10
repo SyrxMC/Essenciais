@@ -1,4 +1,4 @@
-package br.dev.brunoxkk0.essenciais.core.user;
+package br.dev.brunoxkk0.essenciais.modules.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -30,12 +30,13 @@ public abstract class DataStore<T> {
 
     private JsonNode rawData;
 
-    private final ArrayList<T> data = new ArrayList<>();
+    private final ArrayList<T> data;
     private final Class<T> target;
 
-    public DataStore(Class<T> target, Path path) {
+    public DataStore(Class<T> target, Path path, ArrayList<T> data) {
         this.target = target;
         this.dataStorePath = path;
+        this.data = data;
     }
 
     public void load() throws IOException {
@@ -111,10 +112,6 @@ public abstract class DataStore<T> {
         }
 
         Files.write(dataStorePath, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode).getBytes(StandardCharsets.UTF_8));
-    }
-
-    public ArrayList<T> getData() {
-        return data;
     }
 
     public static abstract class Extensible {

@@ -1,4 +1,4 @@
-package br.dev.brunoxkk0.essenciais.core.user;
+package br.dev.brunoxkk0.essenciais.modules.user.model;
 
 import br.dev.brunoxkk0.essenciais.core.data.DataStore;
 import lombok.*;
@@ -13,9 +13,11 @@ import java.util.UUID;
 public class User extends DataStore.Extensible {
 
     private UUID uuid;
+
     private String name;
-    private String lastName;
+    private String displayName;
 
     private long lastSeen;
+    private long fistSeen;
 
 }
