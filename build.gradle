@@ -1,0 +1,100 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'application'
+}
+
+//mainClass = "br.dev.brunoxkk0.teste.java"
+
+group 'br.dev.brunoxkk0'
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+
+    mavenCentral()
+
+    maven {
+        name = 'enginehub'
+        url = 'https://maven.enginehub.org/repo/'
+    }
+
+    maven {
+        name = 'jitpack'
+        url = 'https://jitpack.io'
+    }
+
+    maven {
+        name = 'Sonatype OSS'
+        url = 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
+
+    maven {
+        name = 'CodeMC'
+        url = 'https://repo.codemc.io/'
+    }
+
+    maven {
+        name = 'sk89q'
+        url = 'https://maven.sk89q.com/repo/'
+    }
+
+}
+
+dependencies {
+
+    annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.2'
+    compileOnly 'com.github.bsideup.jabel:jabel-javac-plugin:0.4.2'
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+
+    annotationProcessor 'net.java.dev.jna:jna-platform:5.13.0'
+
+    compileOnly 'com.sk89q.worldedit:worldedit-bukkit:6.1.5'
+    compileOnly 'com.sk89q.worldguard:worldguard-legacy:6.2'
+
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7.1'
+
+    compileOnly 'com.github.CrucibleMC:Crucible:81fcb90bad'
+
+    compileOnly 'com.github.SyrxMC:SyrxCore:1.0.1'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
+
+
+}
+
+configure([tasks.compileJava]) {
+    sourceCompatibility = 17 // for the IDE support
+    options.release = 8
+    options.encoding = 'UTF-8'
+
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+
+compileJava.options.encoding = 'UTF-8'
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('')
+}
+
+build {
+    dependsOn(shadowJar)
+}

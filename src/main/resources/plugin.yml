@@ -1,0 +1,7 @@
+name: Essenciais
+version: 1.12.2.0
+description: Core plugin for servers.
+
+author: Brunoxkk0
+
+main: br.dev.brunoxkk0.syrxmccore.SyrxCore
