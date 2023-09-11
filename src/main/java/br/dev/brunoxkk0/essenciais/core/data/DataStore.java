@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
@@ -28,10 +29,10 @@ public abstract class DataStore<T> {
 
     private final Path dataStorePath;
 
-    private JsonNode rawData;
-
     private final ArrayList<T> data;
     private final Class<T> target;
+
+    private final HashMap<T, Path> DATA_PATH_REFERENCE = new HashMap<>();
 
     public DataStore(Class<T> target, Path path, ArrayList<T> data) {
         this.target = target;
@@ -41,51 +42,58 @@ public abstract class DataStore<T> {
 
     public void load() throws IOException {
 
-        if (Files.isRegularFile(dataStorePath)) {
+        if (Files.isDirectory(dataStorePath)) {
 
-            rawData = OBJECT_MAPPER.readTree(Files.newBufferedReader(dataStorePath, StandardCharsets.UTF_8));
+            File[] files = dataStorePath.toFile().listFiles();
 
-            if (rawData.isArray()) {
+            if (files == null)
+                return;
 
-                for (Iterator<JsonNode> it = rawData.elements(); it.hasNext(); ) {
+            for (File file : files) {
 
-                    JsonNode node = it.next();
+                JsonNode rawData = OBJECT_MAPPER.readTree(Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8));
 
-                    T obj = OBJECT_MAPPER.treeToValue(node, target);
+                if (rawData.isArray()) {
 
-                    if (obj instanceof Extensible extensible)
-                        extensible.rootNode = node;
+                    for (Iterator<JsonNode> it = rawData.elements(); it.hasNext(); ) {
 
-                    data.add(obj);
+                        JsonNode node = it.next();
+
+                        T obj = OBJECT_MAPPER.treeToValue(node, target);
+
+                        if (obj instanceof Extensible extensible)
+                            extensible.rootNode = node;
+
+                        data.add(obj);
+                        DATA_PATH_REFERENCE.put(obj, file.toPath());
+                    }
+
+                    return;
                 }
 
-                return;
+                if (rawData.isObject()) {
+
+                    T obj = OBJECT_MAPPER.treeToValue(rawData, target);
+
+                    if (obj instanceof Extensible extensible)
+                        extensible.rootNode = rawData;
+
+                    data.add(obj);
+                    DATA_PATH_REFERENCE.put(obj, file.toPath());
+                }
+
             }
-
-            if (rawData.isObject()) {
-
-                T obj = OBJECT_MAPPER.treeToValue(rawData, target);
-
-                if (obj instanceof Extensible extensible)
-                    extensible.rootNode = rawData;
-
-                data.add(obj);
-            }
-
         }
-
     }
 
     public synchronized void save() throws IOException {
 
-        ArrayList<JsonNode> jsonNode = new ArrayList<>();
+        for (Map.Entry<T, Path> item : DATA_PATH_REFERENCE.entrySet()) {
 
-        for (T item : data) {
-
-            JsonNode itemNode = OBJECT_MAPPER.valueToTree(item);
+            JsonNode itemNode = OBJECT_MAPPER.valueToTree(item.getKey());
             ObjectNode objectNode = ((ObjectNode) itemNode);
 
-            if (item instanceof Extensible extensible) {
+            if (item.getKey() instanceof Extensible extensible) {
 
                 if (extensible.rootNode != null) {
 
@@ -107,11 +115,9 @@ public abstract class DataStore<T> {
 
             }
 
-            jsonNode.add(objectNode);
+            Files.write(item.getValue(), OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode).getBytes(StandardCharsets.UTF_8));
 
         }
-
-        Files.write(dataStorePath, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode).getBytes(StandardCharsets.UTF_8));
     }
 
     public static abstract class Extensible {
@@ -144,7 +150,7 @@ public abstract class DataStore<T> {
 
         }
 
-        public final <T> T getOrCreateExtension(String key, Class<? extends T> target) {
+        public final <T> T getOrCreateExtension(String key, Class<? extends T> target, Path path) {
 
             Optional<T> extension = getExtension(key, target);
 
