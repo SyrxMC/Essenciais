@@ -86,7 +86,19 @@ public abstract class DataStore<T> {
         }
     }
 
+    public abstract Path calculateFilePath(T item);
+
+    public Path getDataStorePath() {
+        return dataStorePath;
+    }
+
     public synchronized void save() throws IOException {
+
+        for(T item : data){
+            if(!DATA_PATH_REFERENCE.containsKey(item)){
+                DATA_PATH_REFERENCE.put(item, calculateFilePath(item));
+            }
+        }
 
         for (Map.Entry<T, Path> item : DATA_PATH_REFERENCE.entrySet()) {
 

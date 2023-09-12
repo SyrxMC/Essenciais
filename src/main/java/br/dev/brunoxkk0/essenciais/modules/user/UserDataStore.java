@@ -3,6 +3,7 @@ package br.dev.brunoxkk0.essenciais.modules.user;
 import br.dev.brunoxkk0.essenciais.core.data.DataStore;
 import br.dev.brunoxkk0.essenciais.modules.user.model.User;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -35,6 +36,9 @@ public class UserDataStore extends DataStore<User> {
         return users.size();
     }
 
-
+    @Override
+    public Path calculateFilePath(User item) {
+        return new File(getDataStorePath().toFile(), item.getUuid().toString() + ".json").toPath();
+    }
 
 }
