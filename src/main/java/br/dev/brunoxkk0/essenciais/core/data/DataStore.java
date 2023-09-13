@@ -8,9 +8,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,15 +31,15 @@ public abstract class DataStore<T> {
 
     private final Path dataStorePath;
 
-    private final ArrayList<T> data;
     private final Class<T> target;
 
     private final HashMap<T, Path> DATA_PATH_REFERENCE = new HashMap<>();
+    private final ArrayList<T> DATA_ARRAY;
 
-    public DataStore(Class<T> target, Path path, ArrayList<T> data) {
+    public DataStore(Class<T> target, Path path, ArrayList<T> dataArray) {
         this.target = target;
         this.dataStorePath = path;
-        this.data = data;
+        this.DATA_ARRAY = dataArray;
     }
 
     public void load() throws IOException {
@@ -56,34 +58,29 @@ public abstract class DataStore<T> {
                 if (rawData.isArray()) {
 
                     for (Iterator<JsonNode> it = rawData.elements(); it.hasNext(); ) {
-
                         JsonNode node = it.next();
-
-                        T obj = OBJECT_MAPPER.treeToValue(node, target);
-
-                        if (obj instanceof Extensible extensible)
-                            extensible.rootNode = node;
-
-                        data.add(obj);
-                        DATA_PATH_REFERENCE.put(obj, file.toPath());
+                        loadDataEntry(file, node);
                     }
 
                     return;
                 }
 
                 if (rawData.isObject()) {
-
-                    T obj = OBJECT_MAPPER.treeToValue(rawData, target);
-
-                    if (obj instanceof Extensible extensible)
-                        extensible.rootNode = rawData;
-
-                    data.add(obj);
-                    DATA_PATH_REFERENCE.put(obj, file.toPath());
+                    loadDataEntry(file, rawData);
                 }
 
             }
         }
+    }
+
+    private void loadDataEntry(File file, JsonNode rawData) throws JsonProcessingException {
+        T obj = OBJECT_MAPPER.treeToValue(rawData, target);
+
+        if (obj instanceof Extensible extensible)
+            extensible.rootNode = rawData;
+
+        DATA_ARRAY.add(obj);
+        DATA_PATH_REFERENCE.put(obj, file.toPath());
     }
 
     public abstract Path calculateFilePath(T item);
@@ -94,15 +91,12 @@ public abstract class DataStore<T> {
 
     public synchronized void save() throws IOException {
 
-        for(T item : data){
-            if(!DATA_PATH_REFERENCE.containsKey(item)){
-                DATA_PATH_REFERENCE.put(item, calculateFilePath(item));
-            }
-        }
+        updatedObjectsPath();
 
         for (Map.Entry<T, Path> item : DATA_PATH_REFERENCE.entrySet()) {
 
             JsonNode itemNode = OBJECT_MAPPER.valueToTree(item.getKey());
+
             ObjectNode objectNode = ((ObjectNode) itemNode);
 
             if (item.getKey() instanceof Extensible extensible) {
@@ -110,19 +104,14 @@ public abstract class DataStore<T> {
                 if (extensible.rootNode != null) {
 
                     JsonNode originalNode = extensible.rootNode;
+                    ObjectNode originalObjectNode = (ObjectNode) originalNode;
 
-                    for (Iterator<Map.Entry<String, JsonNode>> iter = originalNode.fields(); iter.hasNext(); ) {
-                        Map.Entry<String, JsonNode> nodeItem = iter.next();
+                    objectNode = originalObjectNode.setAll(objectNode);
 
-                        if (!itemNode.has(nodeItem.getKey())) {
-                            objectNode.set(nodeItem.getKey(), nodeItem.getValue());
-                        }
+                }
 
-                    }
-                } else {
-                    for (Map.Entry<String, Object> data : extensible.internalExtensiveReferences.entrySet()) {
-                        objectNode.set(data.getKey(), OBJECT_MAPPER.valueToTree(data.getValue()));
-                    }
+                for (Map.Entry<String, Object> data : extensible.getInternalExtensiveReferences().entrySet()) {
+                    objectNode.set(data.getKey(), OBJECT_MAPPER.valueToTree(data.getValue()));
                 }
 
             }
@@ -132,29 +121,39 @@ public abstract class DataStore<T> {
         }
     }
 
+    private void updatedObjectsPath() {
+        for(T item : DATA_ARRAY){
+            if(!DATA_PATH_REFERENCE.containsKey(item)){
+                DATA_PATH_REFERENCE.put(item, calculateFilePath(item));
+            }
+        }
+    }
+
     public static abstract class Extensible {
 
         @JsonIgnore
-        private JsonNode rootNode;
+        private transient JsonNode rootNode;
 
         @JsonIgnore
-        private final HashMap<String, Object> internalExtensiveReferences = new HashMap<>();
+        private transient final HashMap<String, Object> internalExtensiveReferences = new HashMap<>();
 
 
         public final <T> Optional<T> getExtension(String key, Class<? extends T> target) {
 
             if (rootNode != null) {
+
                 try {
+
                     T obj = OBJECT_MAPPER.treeToValue(rootNode.at(key), target);
 
                     if (obj != null) {
-                        internalExtensiveReferences.put(key, obj);
+                        setExtension(key, obj);
                         return Optional.of(obj);
                     }
 
                     return Optional.empty();
-                } catch (JsonProcessingException ignored) {
-                }
+
+                } catch (JsonProcessingException ignored) {}
 
             }
 
@@ -162,22 +161,45 @@ public abstract class DataStore<T> {
 
         }
 
-        public final <T> T getOrCreateExtension(String key, Class<? extends T> target, Path path) {
+        @SneakyThrows
+        public final <T> T getOrCreateExtension(String key, Class<? extends T> target) {
 
             Optional<T> extension = getExtension(key, target);
 
             if (!extension.isPresent()) {
-                try {
-                    T obj = target.getDeclaredConstructor().newInstance();
-                    internalExtensiveReferences.put(key, obj);
-                    return obj;
-                } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
-                         NoSuchMethodException e) {
-                    throw new IllegalArgumentException("The class " + target.getName() + " don't have a default constructor declared.");
-                }
+
+                T obj = createInstance(target);
+
+                setExtension(key, obj);
+
+                return obj;
+
             }
 
             return extension.get();
+        }
+
+        public static <T> T createInstance(Class<T> target) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+
+            Constructor<?>[] constructors = target.getDeclaredConstructors();
+            Constructor<?> finalConstructor = null;
+
+            for(Constructor<?> constructor : constructors){
+                if(constructor.getParameterCount() == 0){
+                    finalConstructor = constructor;
+                    break;
+                }
+
+            }
+            if(finalConstructor != null){
+
+                finalConstructor.setAccessible(true);
+
+                //noinspection unchecked
+                return (T) finalConstructor.newInstance();
+            }
+
+            throw new IllegalArgumentException(String.format("The target class %s don't expose an a no args constructor.", target.getName()));
         }
 
         public void setExtension(String key, Object object) {
