@@ -17,9 +17,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
+
+import static java.nio.file.StandardOpenOption.*;
 
 public abstract class DataStore<T> {
 
@@ -38,9 +42,18 @@ public abstract class DataStore<T> {
     private final ArrayList<T> DATA_ARRAY;
 
     public DataStore(Class<T> target, Path path, ArrayList<T> dataArray) {
+
         this.target = target;
         this.dataStorePath = path;
         this.DATA_ARRAY = dataArray;
+
+        File file = path.toFile();
+
+        if (!file.exists()) {
+            if (file.mkdirs())
+                logger.info("Created folder at " + path);
+        }
+
     }
 
     public void load() throws IOException {
@@ -54,37 +67,26 @@ public abstract class DataStore<T> {
 
             for (File file : files) {
 
-                JsonNode rawData = OBJECT_MAPPER.readTree(Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8));
+                ObjectNode rawData = (ObjectNode) OBJECT_MAPPER.readTree(
+                        Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)
+                );
 
-                if (rawData.isArray()) {
-
-                    for (Iterator<JsonNode> it = rawData.elements(); it.hasNext(); ) {
-                        JsonNode node = it.next();
-                        loadDataEntry(file, node);
-                    }
-
-                    return;
-                }
-
-                if (rawData.isObject()) {
-                    loadDataEntry(file, rawData);
-                }
+                loadDataEntry(file, rawData);
 
             }
         }
     }
 
     private void loadDataEntry(File file, JsonNode rawData) throws JsonProcessingException {
+
         T obj = OBJECT_MAPPER.treeToValue(rawData, target);
 
         if (obj instanceof Extensible extensible)
-            extensible.rootNode = rawData;
+            extensible.rootNode = (ObjectNode) rawData;
 
         DATA_ARRAY.add(obj);
         DATA_PATH_REFERENCE.put(obj, file.toPath());
     }
-
-    public abstract Path calculateFilePath(T item);
 
     public Path getDataStorePath() {
         return dataStorePath;
@@ -112,11 +114,8 @@ public abstract class DataStore<T> {
     }
 
     private static void writeItemData(Path item, ObjectNode objectNode) throws IOException {
-        Files.write(item, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode).getBytes(StandardCharsets.UTF_8),
-                StandardOpenOption.WRITE,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING
-        );
+        byte[] data = OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode).getBytes(StandardCharsets.UTF_8);
+        Files.write(item, data, WRITE, CREATE, TRUNCATE_EXISTING);
     }
 
     public synchronized void save(T item) throws IOException {
@@ -127,9 +126,7 @@ public abstract class DataStore<T> {
 
         Path path = DATA_PATH_REFERENCE.get(item);
 
-        JsonNode itemNode = OBJECT_MAPPER.valueToTree(item);
-
-        ObjectNode objectNode = ((ObjectNode) itemNode);
+        ObjectNode objectNode = OBJECT_MAPPER.valueToTree(item);
 
         if (item instanceof Extensible extensible) {
 
@@ -143,17 +140,13 @@ public abstract class DataStore<T> {
     private ObjectNode getJsonNodes(ObjectNode objectNode, Extensible extensible) {
 
         if (extensible.rootNode != null) {
-
-            JsonNode originalNode = extensible.rootNode;
-            ObjectNode originalObjectNode = (ObjectNode) originalNode;
-
-            objectNode = originalObjectNode.setAll(objectNode);
-
+            objectNode = (extensible.rootNode.setAll(objectNode));
         }
 
         for (Map.Entry<String, Object> data : extensible.getInternalExtensiveReferences().entrySet()) {
             objectNode.set(data.getKey(), OBJECT_MAPPER.valueToTree(data.getValue()));
         }
+
         return objectNode;
     }
 
@@ -165,10 +158,12 @@ public abstract class DataStore<T> {
         }
     }
 
+    public abstract Path calculateFilePath(T item);
+
     public static abstract class Extensible {
 
         @JsonIgnore
-        private transient JsonNode rootNode;
+        private transient ObjectNode rootNode;
 
         @JsonIgnore
         private transient final HashMap<String, Object> internalExtensiveReferences = new HashMap<>();
