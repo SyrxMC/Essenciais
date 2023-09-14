@@ -2,6 +2,10 @@ package br.dev.brunoxkk0.essenciais.modules.user;
 
 import br.dev.brunoxkk0.essenciais.Essenciais;
 import br.dev.brunoxkk0.essenciais.core.module.IModule;
+import br.dev.brunoxkk0.essenciais.modules.user.data.UserDataStore;
+import br.dev.brunoxkk0.essenciais.modules.user.event.PlayerConnectionHandler;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.logging.Logger;
@@ -41,7 +45,7 @@ public class UserModule implements IModule {
 
         logger.info("loading module...");
 
-        userDataStore = new UserDataStore(new File(essenciais.getDataFolder(), "data/users.json").toPath());
+        userDataStore = new UserDataStore(new File(essenciais.getDataFolder(), "data/users/").toPath());
 
         try{
 
@@ -63,7 +67,7 @@ public class UserModule implements IModule {
 
     @Override
     public void onEnable(Essenciais essenciais) {
-
+        Bukkit.getPluginManager().registerEvents(new PlayerConnectionHandler(), essenciais);
     }
 
     @Override
@@ -86,6 +90,10 @@ public class UserModule implements IModule {
     @Override
     public boolean isLoaded() {
         return isLoaded;
+    }
+
+    public void handleNewPlayer(Player player){
+
     }
 
 }

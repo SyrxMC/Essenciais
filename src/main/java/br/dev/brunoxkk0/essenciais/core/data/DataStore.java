@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -101,29 +102,64 @@ public abstract class DataStore<T> {
 
             if (item.getKey() instanceof Extensible extensible) {
 
-                if (extensible.rootNode != null) {
-
-                    JsonNode originalNode = extensible.rootNode;
-                    ObjectNode originalObjectNode = (ObjectNode) originalNode;
-
-                    objectNode = originalObjectNode.setAll(objectNode);
-
-                }
-
-                for (Map.Entry<String, Object> data : extensible.getInternalExtensiveReferences().entrySet()) {
-                    objectNode.set(data.getKey(), OBJECT_MAPPER.valueToTree(data.getValue()));
-                }
+                objectNode = getJsonNodes(objectNode, extensible);
 
             }
 
-            Files.write(item.getValue(), OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode).getBytes(StandardCharsets.UTF_8));
+            writeItemData(item.getValue(), objectNode);
 
         }
     }
 
+    private static void writeItemData(Path item, ObjectNode objectNode) throws IOException {
+        Files.write(item, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode).getBytes(StandardCharsets.UTF_8),
+                StandardOpenOption.WRITE,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING
+        );
+    }
+
+    public synchronized void save(T item) throws IOException {
+
+        if (!DATA_PATH_REFERENCE.containsKey(item)) {
+            DATA_PATH_REFERENCE.put(item, calculateFilePath(item));
+        }
+
+        Path path = DATA_PATH_REFERENCE.get(item);
+
+        JsonNode itemNode = OBJECT_MAPPER.valueToTree(item);
+
+        ObjectNode objectNode = ((ObjectNode) itemNode);
+
+        if (item instanceof Extensible extensible) {
+
+            objectNode = getJsonNodes(objectNode, extensible);
+
+        }
+
+        writeItemData(path, objectNode);
+    }
+
+    private ObjectNode getJsonNodes(ObjectNode objectNode, Extensible extensible) {
+
+        if (extensible.rootNode != null) {
+
+            JsonNode originalNode = extensible.rootNode;
+            ObjectNode originalObjectNode = (ObjectNode) originalNode;
+
+            objectNode = originalObjectNode.setAll(objectNode);
+
+        }
+
+        for (Map.Entry<String, Object> data : extensible.getInternalExtensiveReferences().entrySet()) {
+            objectNode.set(data.getKey(), OBJECT_MAPPER.valueToTree(data.getValue()));
+        }
+        return objectNode;
+    }
+
     private void updatedObjectsPath() {
-        for(T item : DATA_ARRAY){
-            if(!DATA_PATH_REFERENCE.containsKey(item)){
+        for (T item : DATA_ARRAY) {
+            if (!DATA_PATH_REFERENCE.containsKey(item)) {
                 DATA_PATH_REFERENCE.put(item, calculateFilePath(item));
             }
         }
@@ -144,7 +180,7 @@ public abstract class DataStore<T> {
 
                 try {
 
-                    T obj = OBJECT_MAPPER.treeToValue(rootNode.at(key), target);
+                    T obj = OBJECT_MAPPER.treeToValue(rootNode.at("/" + key), target);
 
                     if (obj != null) {
                         setExtension(key, obj);
@@ -153,7 +189,8 @@ public abstract class DataStore<T> {
 
                     return Optional.empty();
 
-                } catch (JsonProcessingException ignored) {}
+                } catch (JsonProcessingException ignored) {
+                }
 
             }
 
@@ -184,14 +221,14 @@ public abstract class DataStore<T> {
             Constructor<?>[] constructors = target.getDeclaredConstructors();
             Constructor<?> finalConstructor = null;
 
-            for(Constructor<?> constructor : constructors){
-                if(constructor.getParameterCount() == 0){
+            for (Constructor<?> constructor : constructors) {
+                if (constructor.getParameterCount() == 0) {
                     finalConstructor = constructor;
                     break;
                 }
 
             }
-            if(finalConstructor != null){
+            if (finalConstructor != null) {
 
                 finalConstructor.setAccessible(true);
 

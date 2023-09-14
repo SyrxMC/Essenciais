@@ -1,9 +1,10 @@
-package br.dev.brunoxkk0.essenciais.modules.user;
+package br.dev.brunoxkk0.essenciais.modules.user.data;
 
 import br.dev.brunoxkk0.essenciais.core.data.DataStore;
-import br.dev.brunoxkk0.essenciais.modules.user.model.User;
+import br.dev.brunoxkk0.essenciais.modules.user.data.model.User;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -34,6 +35,15 @@ public class UserDataStore extends DataStore<User> {
 
     public int count(){
         return users.size();
+    }
+
+    public void register(User user){
+        users.add(user);
+    }
+
+    public void registerAndSave(User user) throws IOException {
+        register(user);
+        save(user);
     }
 
     @Override

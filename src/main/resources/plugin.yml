@@ -4,4 +4,7 @@ description: Core plugin for servers.
 
 author: Brunoxkk0
 
-main: br.dev.brunoxkk0.syrxmccore.SyrxCore
+main: br.dev.brunoxkk0.essenciais.Essenciais
+
+depend:
+  - SyrxCore

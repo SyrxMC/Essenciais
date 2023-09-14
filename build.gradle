@@ -1,10 +1,7 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'application'
 }
-
-//mainClass = "br.dev.brunoxkk0.teste.java"
 
 group 'br.dev.brunoxkk0'
 version '1.0'
@@ -92,6 +89,7 @@ processResources {
 }
 
 shadowJar {
+    relocate("com.fasterxml", "br.dev.brunoxkk0.essenciais.libs.com.fasterxml")
     archiveClassifier.set('')
 }
 

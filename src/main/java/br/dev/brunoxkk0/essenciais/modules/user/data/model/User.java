@@ -1,4 +1,4 @@
-package br.dev.brunoxkk0.essenciais.modules.user.model;
+package br.dev.brunoxkk0.essenciais.modules.user.data.model;
 
 import br.dev.brunoxkk0.essenciais.core.data.DataStore;
 import lombok.*;
@@ -17,7 +17,9 @@ public class User extends DataStore.Extensible {
     private String name;
     private String displayName;
 
-    private long lastSeen;
     private long fistSeen;
+    private long lastSeen;
+
+    private String ip;
 
 }
