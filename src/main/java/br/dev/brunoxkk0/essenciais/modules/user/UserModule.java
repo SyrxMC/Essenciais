@@ -34,6 +34,10 @@ public class UserModule implements IModule {
         return userDataStore;
     }
 
+    public static UserConfig getUserConfig() {
+        return userConfig;
+    }
+
     public UserModule(){
         instance = this;
     }
