@@ -1,7 +1,9 @@
 package br.dev.brunoxkk0.essenciais.modules.user;
 
 import br.dev.brunoxkk0.essenciais.Essenciais;
+import br.dev.brunoxkk0.essenciais.core.config.ConfigFactory;
 import br.dev.brunoxkk0.essenciais.core.module.IModule;
+import br.dev.brunoxkk0.essenciais.modules.user.config.UserConfig;
 import br.dev.brunoxkk0.essenciais.modules.user.data.UserDataStore;
 import br.dev.brunoxkk0.essenciais.modules.user.event.PlayerConnectionHandler;
 import org.bukkit.Bukkit;
@@ -16,6 +18,7 @@ public class UserModule implements IModule {
 
     private static UserModule instance;
     private static UserDataStore userDataStore;
+    private static UserConfig userConfig;
 
     private boolean isLoaded = false;
 
@@ -61,6 +64,8 @@ public class UserModule implements IModule {
             logger.warning("Error when loading user data: " + e.getMessage());
             return;
         }
+
+        userConfig = ConfigFactory.loadConfig(new File(essenciais.getDataFolder(), "config/user.hocon").toPath(), UserConfig.class);
 
         isLoaded = true;
     }
