@@ -63,14 +63,7 @@ public class PlayerConnectionHandler implements Listener {
 
             Location location = player.getLocation();
 
-            position.setX(location.getX());
-            position.setY(location.getY());
-            position.setZ(location.getZ());
-
-            position.setYaw(location.getYaw());
-            position.setPitch(location.getPitch());
-
-            position.setWorld(location.getWorld().getUID().toString());
+            position.copyLocation(location);
 
             userDataStore.save(user);
 
