@@ -56,10 +56,10 @@ dependencies {
 
     compileOnly 'com.github.CrucibleMC:Crucible:81fcb90bad'
 
-    compileOnly 'com.github.SyrxMC:SyrxCore:1.0.1'
+    compileOnly 'com.github.SyrxMC:SyrxCore:1.0.2'
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
-
+    compileOnly fileTree(dir: 'libs', include: "*.jar")
 
 }
 

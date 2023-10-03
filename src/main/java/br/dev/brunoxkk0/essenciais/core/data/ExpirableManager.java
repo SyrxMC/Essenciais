@@ -80,7 +80,7 @@ public class ExpirableManager {
     }
 
     public enum Reason {
-        TELEPORT;
+        TELEPORT, TELEPORT_ALL;
     }
 
     @AllArgsConstructor
