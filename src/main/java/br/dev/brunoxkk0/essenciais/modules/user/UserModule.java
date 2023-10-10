@@ -6,6 +6,7 @@ import br.dev.brunoxkk0.essenciais.core.module.IModule;
 import br.dev.brunoxkk0.essenciais.modules.user.config.UserConfig;
 import br.dev.brunoxkk0.essenciais.modules.user.data.UserDataStore;
 import br.dev.brunoxkk0.essenciais.modules.user.event.PlayerConnectionHandler;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -14,25 +15,16 @@ import java.util.logging.Logger;
 
 public class UserModule implements IModule {
 
+    @Getter
     private static final Logger logger = Logger.getLogger("UserModule");
 
+    @Getter
     private static UserModule instance;
+    @Getter
     private static UserDataStore userDataStore;
     private static UserConfig userConfig;
 
     private boolean isLoaded = false;
-
-    public static UserModule getInstance() {
-        return instance;
-    }
-
-    public static Logger getLogger() {
-        return logger;
-    }
-
-    public static UserDataStore getUserDataStore() {
-        return userDataStore;
-    }
 
     public static UserConfig getUserConfig() {
         return userConfig;

@@ -19,7 +19,8 @@ import static br.dev.brunoxkk0.essenciais.modules.teleport.TeleportModule.Lang;
         command = "tpaccept",
         aliases = {"teleportaccept"},
         permission = "essenciais.command.teleport.teleporta",
-        usage = "/tpaccept <player>"
+        usage = "/tpaccept <player>",
+        consoleEnable = false
 )
 public class TeleportAccept implements CommandExecutable {
 
@@ -27,54 +28,20 @@ public class TeleportAccept implements CommandExecutable {
     public void execute(CommandContext commandContext) {
 
         String[] args = commandContext.getArgs();
+        Player player = null;
 
-        if (args == null || args.length == 0) {
-            commandContext.getSender().sendMessage(Lang.getString("WRONG_USAGE"));
-            return;
-        }
+        if (args != null && args.length >= 1 && (commandContext.getSender() instanceof Player playerSender)) {
 
-        if (args.length == 1 && (commandContext.getSender() instanceof Player playerSender)) {
-
-            Player player = Bukkit.getPlayer(args[0]);
+            player = Bukkit.getPlayer(args[0]);
 
             if (player == null) {
                 playerSender.sendMessage(Lang.getString("PLAYER_NOT_FOUND"));
                 return;
             }
 
-            if (playerSender.getUniqueId().equals(player.getUniqueId())) {
-                commandContext.getSender().sendMessage(Lang.getString("MATRIX_FAIL_TELEPORT_ITSELF"));
-                return;
-            }
-
-            User playerAsUser = UserModule.getUserDataStore().findByUUID(player.getUniqueId()).orElse(null);
-
-            if (playerAsUser != null) {
-
-                TeleportPrivacy teleportPrivacy = playerAsUser.getOrCreateExtension("teleportPrivacy", TeleportPrivacy.class);
-
-                if (!teleportPrivacy.isEnabledTeleportInvites()) {
-                    playerSender.sendMessage(Lang.getString("TELEPORT_INVITE_BLOCKED"));
-                    return;
-                }
-
-            }
-
-            String KEY = String.format("tpa_%s_%s", commandContext.getSender().getName(), player.getName());
-
-            if (ExpirableManager.exists(KEY)) {
-                playerSender.sendMessage(Lang.getString("TELEPORT_INVITE_PENDING"));
-                return;
-            }
-
-            ExpirableManager.scheduleExpiration(KEY, playerSender, ExpirableManager.Reason.TELEPORT, ((key, context) -> {
-                playerSender.sendMessage(Lang.getString("TELEPORT_INVITE_EXPIRED"));
-            }), TeleportModule.getTeleportConfig().acceptTime);
-
-
-            playerSender.sendMessage(Lang.getString("TELEPORT_INVITE_SENT"));
-            return;
         }
+
+        if(player != null)
 
         commandContext.getSender().sendMessage(Lang.getString("SENDER_CANNOT_BE_TELEPORTED"));
     }
