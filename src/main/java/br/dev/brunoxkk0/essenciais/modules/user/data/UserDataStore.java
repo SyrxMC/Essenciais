@@ -2,6 +2,7 @@ package br.dev.brunoxkk0.essenciais.modules.user.data;
 
 import br.dev.brunoxkk0.essenciais.core.data.DataStore;
 import br.dev.brunoxkk0.essenciais.modules.user.data.model.User;
+import lombok.Getter;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,11 +15,8 @@ public class UserDataStore extends DataStore<User> {
 
     private static final ArrayList<User> users = new ArrayList<>();
 
+    @Getter
     private static UserDataStore instance;
-
-    public static UserDataStore getInstance() {
-        return instance;
-    }
 
     public UserDataStore(Path folder) {
         super(User.class, folder, users);

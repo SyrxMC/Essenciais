@@ -8,12 +8,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import static br.dev.brunoxkk0.syrxmccore.helper.ReflectionUtils.createInstance;
 import static java.nio.file.StandardOpenOption.*;
 
 public abstract class DataStore<T> {
@@ -34,6 +34,7 @@ public abstract class DataStore<T> {
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
             .configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
 
+    @Getter
     private final Path dataStorePath;
 
     private final Class<T> target;
@@ -86,10 +87,6 @@ public abstract class DataStore<T> {
 
         DATA_ARRAY.add(obj);
         DATA_PATH_REFERENCE.put(obj, file.toPath());
-    }
-
-    public Path getDataStorePath() {
-        return dataStorePath;
     }
 
     public synchronized void save() throws IOException {
@@ -209,29 +206,6 @@ public abstract class DataStore<T> {
             }
 
             return extension.get();
-        }
-
-        public static <T> T createInstance(Class<T> target) throws InvocationTargetException, InstantiationException, IllegalAccessException {
-
-            Constructor<?>[] constructors = target.getDeclaredConstructors();
-            Constructor<?> finalConstructor = null;
-
-            for (Constructor<?> constructor : constructors) {
-                if (constructor.getParameterCount() == 0) {
-                    finalConstructor = constructor;
-                    break;
-                }
-
-            }
-            if (finalConstructor != null) {
-
-                finalConstructor.setAccessible(true);
-
-                //noinspection unchecked
-                return (T) finalConstructor.newInstance();
-            }
-
-            throw new IllegalArgumentException(String.format("The target class %s don't expose an a no args constructor.", target.getName()));
         }
 
         public void setExtension(String key, Object object) {

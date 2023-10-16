@@ -1,11 +1,10 @@
 package br.dev.brunoxkk0.essenciais.modules.teleport;
 
 import br.dev.brunoxkk0.essenciais.Essenciais;
-import br.dev.brunoxkk0.essenciais.core.config.ConfigFactory;
 import br.dev.brunoxkk0.essenciais.core.module.IModule;
 import br.dev.brunoxkk0.essenciais.modules.teleport.config.TeleportConfig;
-import br.dev.brunoxkk0.essenciais.modules.user.config.UserConfig;
 import br.dev.brunoxkk0.syrxmccore.core.commands.CommandManager;
+import br.dev.brunoxkk0.syrxmccore.core.config.ConfigFactory;
 import lombok.Getter;
 
 import java.io.File;

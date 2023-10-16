@@ -1,7 +1,7 @@
 package br.dev.brunoxkk0.essenciais.modules.teleport.config;
 
-import br.dev.brunoxkk0.essenciais.core.config.Comment;
-import br.dev.brunoxkk0.essenciais.core.config.ConfigFactory;
+import br.dev.brunoxkk0.syrxmccore.core.config.Comment;
+import br.dev.brunoxkk0.syrxmccore.core.config.ConfigFactory;
 import br.dev.brunoxkk0.syrxmccore.libs.com.electronwill.nightconfig.core.conversion.Path;
 
 public class TeleportConfig extends ConfigFactory.PathConfig {

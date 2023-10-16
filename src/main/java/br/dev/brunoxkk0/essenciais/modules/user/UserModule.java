@@ -1,11 +1,11 @@
 package br.dev.brunoxkk0.essenciais.modules.user;
 
 import br.dev.brunoxkk0.essenciais.Essenciais;
-import br.dev.brunoxkk0.essenciais.core.config.ConfigFactory;
 import br.dev.brunoxkk0.essenciais.core.module.IModule;
 import br.dev.brunoxkk0.essenciais.modules.user.config.UserConfig;
 import br.dev.brunoxkk0.essenciais.modules.user.data.UserDataStore;
 import br.dev.brunoxkk0.essenciais.modules.user.event.PlayerConnectionHandler;
+import br.dev.brunoxkk0.syrxmccore.core.config.ConfigFactory;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -22,13 +22,10 @@ public class UserModule implements IModule {
     private static UserModule instance;
     @Getter
     private static UserDataStore userDataStore;
+    @Getter
     private static UserConfig userConfig;
 
     private boolean isLoaded = false;
-
-    public static UserConfig getUserConfig() {
-        return userConfig;
-    }
 
     public UserModule(){
         instance = this;
