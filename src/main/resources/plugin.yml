@@ -8,3 +8,9 @@ main: br.dev.brunoxkk0.essenciais.Essenciais
 
 depend:
   - SyrxCore
+  - EverNifeCore
+
+permissions:
+  essenciais.command.teleport.tpa:
+    default: true
+    description: "Allow /tpa command usage."

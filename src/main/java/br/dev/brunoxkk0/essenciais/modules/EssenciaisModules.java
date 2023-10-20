@@ -2,6 +2,7 @@ package br.dev.brunoxkk0.essenciais.modules;
 
 import br.dev.brunoxkk0.essenciais.Essenciais;
 import br.dev.brunoxkk0.essenciais.core.module.IModule;
+import br.dev.brunoxkk0.essenciais.modules.cooldown.CooldownModule;
 import br.dev.brunoxkk0.essenciais.modules.teleport.TeleportModule;
 import br.dev.brunoxkk0.essenciais.modules.user.UserModule;
 
@@ -13,6 +14,7 @@ public class EssenciaisModules {
     private static boolean init = false;
 
     public static void initModules(){
+        MODULES.add(new CooldownModule());
         MODULES.add(new UserModule());
         MODULES.add(new TeleportModule());
         init = true;

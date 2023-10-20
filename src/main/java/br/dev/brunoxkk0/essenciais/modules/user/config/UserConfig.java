@@ -10,4 +10,8 @@ public class UserConfig extends ConfigFactory.PathConfig {
     @Comment("Set the prefix for custom display names, can be empty, not null.")
     public String customDisplayNamePrefix = "¨";
 
+    @Override
+    public long getFileVersion() {
+        return 1;
+    }
 }

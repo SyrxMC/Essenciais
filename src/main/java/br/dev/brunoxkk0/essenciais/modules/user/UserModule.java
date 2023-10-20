@@ -58,7 +58,10 @@ public class UserModule implements IModule {
             return;
         }
 
-        userConfig = ConfigFactory.loadConfig(new File(essenciais.getDataFolder(), "config/user.hocon").toPath(), UserConfig.class);
+        userConfig = ConfigFactory.loadConfig(
+                new File(essenciais.getDataFolder(), "modules/user/config.hocon").toPath(),
+                UserConfig.class
+        );
 
         isLoaded = true;
     }

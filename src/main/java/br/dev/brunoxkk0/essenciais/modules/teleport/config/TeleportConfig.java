@@ -14,4 +14,8 @@ public class TeleportConfig extends ConfigFactory.PathConfig {
     @Comment("Time required to not move to be teleported")
     public long warmUpTime = 5000L;
 
+    @Override
+    public long getFileVersion() {
+        return 2;
+    }
 }
