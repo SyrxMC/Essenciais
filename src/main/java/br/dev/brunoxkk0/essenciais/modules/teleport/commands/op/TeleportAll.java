@@ -1,7 +1,7 @@
 package br.dev.brunoxkk0.essenciais.modules.teleport.commands.op;
 
 import br.dev.brunoxkk0.essenciais.Essenciais;
-import br.dev.brunoxkk0.essenciais.core.data.ExpirableManager;
+import br.dev.brunoxkk0.essenciais.core.data.manager.ExpirableManager;
 import br.dev.brunoxkk0.essenciais.modules.teleport.TeleportModule;
 import br.dev.brunoxkk0.essenciais.modules.teleport.config.TeleportLang;
 import br.dev.brunoxkk0.syrxmccore.core.commands.Command;
@@ -11,7 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import static br.dev.brunoxkk0.essenciais.core.data.ExpirableManager.Reason.TELEPORT_ALL;
+import static br.dev.brunoxkk0.essenciais.core.data.manager.ExpirableManager.Reason.TELEPORT_ALL;
 
 
 @Command(

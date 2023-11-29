@@ -1,26 +1,17 @@
-package br.dev.brunoxkk0.essenciais.core.data;
+package br.dev.brunoxkk0.essenciais.core.data.manager;
 
-import lombok.Data;
+import br.dev.brunoxkk0.essenciais.core.data.Cooldown;
+import br.dev.brunoxkk0.essenciais.core.data.CooldownItem;
+import br.dev.brunoxkk0.essenciais.core.data.DataStore;
 import lombok.SneakyThrows;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class CooldownManager extends DataStore<CooldownManager.Cooldown> {
+public class CooldownManager extends DataStore<Cooldown> {
 
     private final Object lock = new Object();
-
-    public static class Cooldown {
-        public ArrayList<CooldownItem> cooldownList = new ArrayList<>();
-    }
-
-    @Data
-    public static class CooldownItem {
-        private final String key;
-        private final long time;
-        private final long duration;
-    }
 
     private static final ArrayList<Cooldown> cooldowns = new ArrayList<>();
 
@@ -47,7 +38,6 @@ public class CooldownManager extends DataStore<CooldownManager.Cooldown> {
 
     @SneakyThrows
     public void remove(String key) {
-
         lock.wait();
 
         ArrayList<CooldownItem> cooldownItems = access().cooldownList;
@@ -57,3 +47,4 @@ public class CooldownManager extends DataStore<CooldownManager.Cooldown> {
     }
 
 }
+

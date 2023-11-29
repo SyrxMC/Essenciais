@@ -1,6 +1,7 @@
-package br.dev.brunoxkk0.essenciais.core.data;
+package br.dev.brunoxkk0.essenciais.core.data.manager;
 
 import br.dev.brunoxkk0.essenciais.Essenciais;
+import br.dev.brunoxkk0.essenciais.core.data.Expirable;
 import lombok.AllArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;

@@ -64,7 +64,7 @@ dependencies {
 
     compileOnly 'org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT'
 
-    compileOnly 'com.github.SyrxMC:SyrxCore:1.0.7'
+    compileOnly 'com.github.SyrxMC:SyrxCore:1.0.8'
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
     compileOnly fileTree(dir: 'libs', include: "*.jar")

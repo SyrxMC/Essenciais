@@ -3,7 +3,7 @@ package br.dev.brunoxkk0.essenciais.modules.teleport.commands.common;
 import br.com.finalcraft.evernifecore.fancytext.FancyText;
 import br.com.finalcraft.evernifecore.fancytext.FancyTextManager;
 import br.dev.brunoxkk0.essenciais.Essenciais;
-import br.dev.brunoxkk0.essenciais.core.data.ExpirableManager;
+import br.dev.brunoxkk0.essenciais.core.data.manager.ExpirableManager;
 import br.dev.brunoxkk0.essenciais.modules.teleport.TeleportManager;
 import br.dev.brunoxkk0.essenciais.modules.teleport.TeleportModule;
 import br.dev.brunoxkk0.essenciais.modules.teleport.config.TeleportLang;

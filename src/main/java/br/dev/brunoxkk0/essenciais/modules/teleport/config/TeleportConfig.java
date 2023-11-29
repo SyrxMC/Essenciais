@@ -16,6 +16,6 @@ public class TeleportConfig extends ConfigFactory.PathConfig {
 
     @Override
     public long getFileVersion() {
-        return 2;
+        return 1;
     }
 }

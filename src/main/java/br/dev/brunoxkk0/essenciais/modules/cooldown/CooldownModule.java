@@ -1,7 +1,7 @@
 package br.dev.brunoxkk0.essenciais.modules.cooldown;
 
 import br.dev.brunoxkk0.essenciais.Essenciais;
-import br.dev.brunoxkk0.essenciais.core.data.CooldownManager;
+import br.dev.brunoxkk0.essenciais.core.data.manager.CooldownManager;
 import br.dev.brunoxkk0.essenciais.core.module.IModule;
 import lombok.Getter;
 
